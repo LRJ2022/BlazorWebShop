@@ -1,0 +1,35 @@
+﻿@using MyBlazorShopHosted.Libraries.Shared.ShoppingCart.Models
+@using MyBlazorShopHosted.Libraries.Services.ShoppingCart
+@using MyBlazorShopHosted.Libraries.Services.Storage
+@using BlazorApp1.Components.PayPalAPI
+@using Newtonsoft.Json.Serialization
+@using System.Text.Json
+@using System.Text
+@inject IShoppingCartService shoppingCartService
+@inject IConfiguration config
+@inject NavigationManager NavigationManager
+@inject HttpClient httpClient
+@page "/paypal"
+@rendermode InteractiveAuto
+<button onclick="@NewOrder">CheckOut</button>
+@code {
+    public string PaypalClientId = "";
+    public string PaypalSecret = "";
+    public string PaypalUrl = "";
+
+    [Parameter]
+    public decimal Total { get; set; }
+
+    [Parameter]
+    public ShoppingCartModel? shoppingCart { get; set; }
+
+    public async Task NewOrder()
+    {
+        PayPalAPICom payPalAPICom = new PayPalAPICom(config, shoppingCart, Total);
+        (string? ,bool) link = await payPalAPICom.PPANewOrder();
+        if (link.Item2)
+            NavigationManager.NavigateTo(link.Item1);
+        else
+            NavigationManager.NavigateTo("/");
+    }
+}

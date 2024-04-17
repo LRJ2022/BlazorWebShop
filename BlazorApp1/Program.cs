@@ -7,6 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using BlazorApp1.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Globalization;
+using Microsoft.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BlazorApp1Context>(options =>
@@ -22,6 +28,15 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IStorageService, StorageService>();
 builder.Services.AddSingleton<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddTransient<IProductService, ProductService>();
+
+builder.Services.AddScoped<HttpClient>(s =>
+{
+    var uriHelper = s.GetRequiredService<NavigationManager>();
+    return new HttpClient
+    {
+        BaseAddress = new Uri(uriHelper.BaseUri)
+    };
+});
 
 var app = builder.Build();
 
