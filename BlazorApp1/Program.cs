@@ -1,10 +1,18 @@
-using BlazorApp1.Client.Pages;
+﻿using BlazorApp1.Client.Pages;
 using BlazorApp1.Components;
 using MyBlazorShopHosted.Libraries.Services.Product;
 using MyBlazorShopHosted.Libraries.Services.ShoppingCart;
 using MyBlazorShopHosted.Libraries.Services.Storage;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using BlazorApp1.Data;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<BlazorApp1Context>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("BlazorApp1Context") ?? throw new InvalidOperationException("Connection string 'BlazorApp1Context' not found.")));
+
+builder.Services.AddQuickGridEntityFrameworkAdapter();;
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

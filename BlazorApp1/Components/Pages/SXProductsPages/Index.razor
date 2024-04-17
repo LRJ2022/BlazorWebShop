@@ -1,0 +1,43 @@
+﻿@page "/sx"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject BlazorApp1.Data.BlazorApp1Context DB
+@using MyBlazorShopHosted.Libraries.Shared.Milk.Models
+@using BlazorApp1.Client.Pages.Shared
+@rendermode InteractiveServer
+@if (Products?.Any() ?? false)
+{
+    <main class="margin-horizontal:auto max-width:container padding-horizontal:32">
+        <div id="vue-shop" class="margin-bottom:32 quenched">
+            <div class="display:flex flex-grow:1 flex-wrap:wrap margin-bottom:-32 margin-horizontal:-16">
+                <div class="display:flex flex-direction:column flex-grow:0 flex-shrink:0 margin-bottom:32 padding-horizontal:16 width:100 @@mq-768--width:100">
+                    <ul class="display:flex flex-grow:1 flex-wrap:wrap margin-bottom:-32 margin-horizontal:-16">
+                        @foreach(var product in Products)
+                        {
+                            <MilkProductItem Product="product"></MilkProductItem>
+                        }                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    private List<SXProducts> Products { get; set; }
+
+}
+@functions {
+    protected override void OnParametersSet()
+    {
+       
+
+        Products = DB.SXProducts.ToList();
+        //TotalPageCount = productService.GetTotalPageCount(productListingConfig.GetValue<int>("PageSize"));
+
+        base.OnParametersSet();
+    }
+}
