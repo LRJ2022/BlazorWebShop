@@ -11,6 +11,7 @@
     <ProjectReference Include="..\MyBlazorShopHosted.Libraries.Services\MyBlazorShopHosted.Libraries.Services.csproj" />
     <ProjectReference Include="..\MyBlazorShopHosted.Libraries.Shared\MyBlazorShopHosted.Libraries.Shared.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

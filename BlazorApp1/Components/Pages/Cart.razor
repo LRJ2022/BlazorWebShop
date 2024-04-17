@@ -8,6 +8,8 @@
 @page "/cart"
 @inject IShoppingCartService shoppingCartService
 
+
+
 <PageTitle>Cart</PageTitle>
 <HeadContent>
     <meta name="description"  />
@@ -25,6 +27,7 @@
                         }
                     </RowTemplate>
                 </TableTemplate>
+                <Paypal shoppingCart="shoppingCartService.Get()" />
             </div>
         </div>
     </main>

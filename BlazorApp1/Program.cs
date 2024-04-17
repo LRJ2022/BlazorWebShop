@@ -3,6 +3,12 @@ using BlazorApp1.Components;
 using MyBlazorShopHosted.Libraries.Services.Product;
 using MyBlazorShopHosted.Libraries.Services.ShoppingCart;
 using MyBlazorShopHosted.Libraries.Services.Storage;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Globalization;
+using Microsoft.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +20,15 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IStorageService, StorageService>();
 builder.Services.AddSingleton<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddTransient<IProductService, ProductService>();
+
+builder.Services.AddScoped<HttpClient>(s =>
+{
+    var uriHelper = s.GetRequiredService<NavigationManager>();
+    return new HttpClient
+    {
+        BaseAddress = new Uri(uriHelper.BaseUri)
+    };
+});
 
 var app = builder.Build();
 
