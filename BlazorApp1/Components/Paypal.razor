@@ -9,6 +9,7 @@
 @inject IConfiguration config
 @inject NavigationManager NavigationManager
 @inject HttpClient httpClient
+@inject BlazorApp1.Data.BlazorApp1Context DB
 @page "/paypal"
 @rendermode InteractiveAuto
 <button onclick="@NewOrder">CheckOut</button>
@@ -25,7 +26,7 @@
 
     public async Task NewOrder()
     {
-        PayPalAPICom payPalAPICom = new PayPalAPICom(config, shoppingCart, Total);
+        PayPalAPICom payPalAPICom = new PayPalAPICom(config, shoppingCart, Total, DB);
         (string? ,bool) link = await payPalAPICom.PPANewOrder();
         if (link.Item2)
             NavigationManager.NavigateTo(link.Item1);

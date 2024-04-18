@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MyBlazorShopHosted.Libraries.Services.ShoppingCart;
+using MyBlazorShopHosted.Libraries.Shared.Order;
 using MyBlazorShopHosted.Libraries.Shared.ShoppingCart.Models;
 using System;
 using System.Text;
 using System.Text.Json;
+using BlazorApp1.Data;
 
 namespace BlazorApp1.Components.PayPalAPI
 {
@@ -12,15 +14,17 @@ namespace BlazorApp1.Components.PayPalAPI
         private string PaypalClientId = "";
         private string PaypalSecret = "";
         private string PaypalUrl = "";
-        private decimal total;
+        private decimal? total;
         private ShoppingCartModel shoppingCart;
         private HttpClient httpClient = new HttpClient();
+        private BlazorApp1Context DB { get; set; }
 
         // Constructor to inject dependencies
-        public PayPalAPICom(IConfiguration config, ShoppingCartModel shoppingCartModel, decimal total)
+        public PayPalAPICom(IConfiguration config, ShoppingCartModel shoppingCartModel, decimal? total, BlazorApp1Context DB)
         {
             shoppingCart = shoppingCartModel;
             this.total = total;
+            this.DB = DB;
 
             PaypalClientId = config["PaypalSettings:CLIENT_ID"]!;
             PaypalSecret = config["PaypalSettings:Secret"]!;
@@ -38,21 +42,20 @@ namespace BlazorApp1.Components.PayPalAPI
 
             string orderId = JsonDocument.Parse(await createOrderResponse.Content.ReadAsStringAsync()).RootElement.GetProperty("id").GetString();
             Console.WriteLine("Order created successfully " + orderId);
-            var resone = await PPAFetchOrder(orderId);
             var captureLink = await PPACapturePayment(orderId);
+            SaveToDB(orderId);
             return captureLink;
-            //save orderId to db
         }
 
-        public async Task<(string?, bool)> PPAFetchOrder(string orderId)
+        public async Task<(object?, bool)> PPAFetchOrder(string orderId)
         {
             string? accessToken;
             if (orderId == null || (accessToken = await GETAccessToken(httpClient, PaypalClientId, PaypalSecret)) == null)
                 return (orderId == null ? "Error in accessToken fetch" : "No order id in API fetch", false);
-            HttpResponseMessage? orderDetails;
+            string? orderDetails;
             if ((orderDetails = await GETOrderDetails(httpClient, orderId, accessToken)) == null)
                 return ("Error in GETOrderDetails", false);
-            return (null, true);
+            return (orderDetails, true);
         }
 
         public async Task<(string?, bool)> PPACapturePayment(string orderId)
@@ -121,7 +124,7 @@ namespace BlazorApp1.Components.PayPalAPI
             return accessToken;
         }
 
-        private static async Task<HttpResponseMessage?> GETOrderDetails(HttpClient httpClient, string orderID, string accessToken)
+        private static async Task<string?> GETOrderDetails(HttpClient httpClient, string orderID, string accessToken)
         {
             var getOrderUrl = "https://api-m.sandbox.paypal.com/v2/checkout/orders/";
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
@@ -131,7 +134,7 @@ namespace BlazorApp1.Components.PayPalAPI
             httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
             var ordercontent = await response.Content.ReadAsStringAsync();
             var hello = PayPalTemplates.ConvertJsonToShoppingcart(ordercontent);
-            return response;
+            return ordercontent;
         }
 
         private static async Task<HttpResponseMessage?> GETListInvoices(HttpClient httpClient, string accessToken)
@@ -161,6 +164,16 @@ namespace BlazorApp1.Components.PayPalAPI
             var response = await httpClient.GetAsync(getAuthorizeurl);
             var responseContent = await response.Content.ReadAsStringAsync();
             return response;
+        }
+
+        private async void SaveToDB(string orderId)
+        {
+            OrderModel orderModel = new OrderModel()
+            {
+                orderId = orderId,
+            };
+            DB.SXOrderId.Add(orderModel);
+            DB.SaveChangesAsync();
         }
     }
 }
