@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyBlazorShopHosted.Libraries.Shared.Milk.Models;
+using MyBlazorShopHosted.Libraries.Shared.Order;
 
 namespace BlazorApp1.Data
 {
@@ -15,5 +16,6 @@ namespace BlazorApp1.Data
         }
 
         public DbSet<MyBlazorShopHosted.Libraries.Shared.Milk.Models.SXProducts> SXProducts { get; set; } = default!;
+        public DbSet<MyBlazorShopHosted.Libraries.Shared.Order.OrderModel> SXOrderId { get; set; } = default!;
     }
 }

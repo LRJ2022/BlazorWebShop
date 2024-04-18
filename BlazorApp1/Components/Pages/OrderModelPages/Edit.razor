@@ -1,0 +1,86 @@
+﻿@page "/OrderModels/edit"
+@inject BlazorApp1.Data.BlazorApp1Context DB
+@using MyBlazorShopHosted.Libraries.Shared.Order
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h4>OrderModel</h4>
+<hr />
+@if (OrderModel is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="OrderModel" OnValidSubmit="UpdateOrderModel" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="OrderModel.id" value="@OrderModel.id" />
+                <div class="mb-3">
+                    <label for="orderid" class="form-label">orderId:</label>
+                    <InputText id="orderid" @bind-Value="OrderModel.orderId" class="form-control" />
+                    <ValidationMessage For="() => OrderModel.orderId" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/ordermodels">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int id { get; set; }
+
+    [SupplyParameterFromForm]
+    public OrderModel? OrderModel { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        OrderModel ??= await DB.SXOrderId.FirstOrDefaultAsync(m => m.id == id);
+
+        if (OrderModel is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task UpdateOrderModel()
+    {
+        DB.Attach(OrderModel!).State = EntityState.Modified;
+
+        try
+        {
+            await DB.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!OrderModelExists(OrderModel!.id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/ordermodels");
+    }
+
+    bool OrderModelExists(int id)
+    {
+        return DB.SXOrderId.Any(e => e.id == id);
+    }
+}

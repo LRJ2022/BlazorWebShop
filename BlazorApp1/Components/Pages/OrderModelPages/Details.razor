@@ -1,0 +1,46 @@
+﻿@page "/ordermodels/details"
+@inject BlazorApp1.Data.BlazorApp1Context DB
+@using MyBlazorShopHosted.Libraries.Shared.Order
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h4>OrderModel</h4>
+    <hr />
+    @if (ordermodel is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">orderId</dt>
+            <dd class="col-sm-10">@ordermodel.orderId</dd>
+        </dl>
+        <div>
+            <a href="@($"/ordermodels")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    OrderModel? ordermodel;
+
+    [SupplyParameterFromQuery]
+    public int id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ordermodel = await DB.SXOrderId.FirstOrDefaultAsync(m => m.id == id);
+
+        if (ordermodel is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}
+

@@ -3,7 +3,11 @@
 @inject BlazorApp1.Data.BlazorApp1Context DB
 @using MyBlazorShopHosted.Libraries.Shared.Milk.Models
 @using BlazorApp1.Client.Pages.Shared
+@using BlazorApp1.Client.Pages
 @rendermode InteractiveServer
+
+<UserNameDisplay />
+
 @if (Products?.Any() ?? false)
 {
     <main class="margin-horizontal:auto max-width:container padding-horizontal:32">
