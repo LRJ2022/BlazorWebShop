@@ -1,6 +1,7 @@
 ﻿@using MyBlazorShopHosted.Libraries.Shared.Milk.Models
 @inject NavigationManager navigationManager
 @rendermode InteractiveAuto
+@inject MilkProductCart milkShoppingCart
 @if (Product != null)
 {
     <li class="display:flex flex-direction:column flex-grow:0 flex-shrink:0 margin-bottom:32 padding-horizontal:16 width:100 @@mq-560--width:50 @@mq-800--width:33 @@mq-960--width:25">
@@ -17,7 +18,7 @@
                 @if (Quantity.HasValue)
                 {
                     <span>
-                        <text>Add @Quantity more?</text>
+                        <text>Add @Quantity?</text>
                     </span>
                 }
                 else
@@ -45,7 +46,7 @@
         //if (MilkShoppingCart == null) MilkShoppingCart = new MilkProductCart();
         if (Product != null)
         {
-            MilkShoppingCart.AddProduct(Product, Quantity ?? 1);
+            milkShoppingCart.AddProduct(Product, Quantity ?? 1);
             Quantity = null;
 
             navigationManager.NavigateTo("/hh");

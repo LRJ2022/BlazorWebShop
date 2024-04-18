@@ -30,13 +30,37 @@ namespace MyBlazorShopHosted.Libraries.Shared.Milk.Models
                 Items.Add(new ShoppingCartItem
                 {
                     product = product,
-                    Quantity = quantity
+                    Quantity = quantity,
+                    Price = product.Price * quantity //totalpris
                 });
             }
         }
 
+        public void DeleteProduct(ShoppingCartItem item)
+        {
+            // Get all items from the cart.
+            var items = GetItems();
+
+            if (HasProduct(item.product.Id))
+            {
+                // Delete item from shopping cart
+                items.Remove(items.First(i => i.product.Id == item.product.Id));
+            }
+        }
+
+        public bool HasProduct(int id)
+        {
+            var shoppingCart = GetItems();
+
+            return shoppingCart.Any(i => i.product.Id == id);
+        }
+
         public List<ShoppingCartItem> GetItems() {  return Items; }
 
+        public MilkProductCart()
+        {
+            Items = new List<ShoppingCartItem>();
+        }
     }
 }
 

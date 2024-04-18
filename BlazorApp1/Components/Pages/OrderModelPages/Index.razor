@@ -1,18 +1,85 @@
-﻿@page "/ordermodels"
+﻿@page "/admin"
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using MyBlazorShopHosted.Libraries.Shared.Order
+@using BlazorApp1.Client.Pages
 @inject BlazorApp1.Data.BlazorApp1Context DB
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 
-<div>
-    @foreach (var item in DB.SXOrderId)
-    {
-        <div class="table">
-            <span>@item.orderId</span>
-            <button @onclick="() => OpenOrder(item.orderId)">Open</button>
-        </div>
-    }
+<head>
+    <style>
+        .titleDesign {
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            max-height: 100%;
+            overflow-y: auto;
+            max-width: 50%;
+        }
+
+            .left-panel ul {
+                list-style-type: none;
+                padding: 0;
+            }
+
+                .left-panel ul li {
+                    margin-bottom: 5px;
+                }
+
+                    .left-panel ul li a {
+                        display: block;
+                        padding: 5px;
+                        color: #333;
+                        text-decoration: none;
+                        background-color: #f0f0f0;
+                        border-radius: 5px;
+                        transition: background-color 0.3s;
+                    }
+
+                        .left-panel ul li a:hover {
+                            background-color: #ccc;
+                            cursor: pointer;
+                        }
+
+                        .left-panel ul li a:focus {
+                            outline: none;
+                        }
+
+                        .left-panel ul li a:active {
+                            background-color: #aaa;
+                        }
+    </style>
+</head>
+
+<h1 class="titleDesign">Se de seneste ordrer</h1>
+<div class="container">
+    <div class="left-panel">
+        <ul>
+            @if (DB.SXOrderId != null)
+            {
+                @foreach (var order in DB.SXOrderId.OrderByDescending(o => o.id).Take(20).OrderBy(o => o.id))
+                {
+                    <li>
+                        <a href="@($"ordermodels/details?id={order.orderId}")">@order.orderId</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
 </div>
 
 @code {

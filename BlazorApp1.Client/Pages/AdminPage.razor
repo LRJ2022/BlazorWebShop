@@ -1,4 +1,5 @@
-﻿@page "/admin"
+﻿<!--page "/admin"-->
+@using MyBlazorShopHosted.Libraries.Shared.Order
 @using MyBlazorShopHosted.Libraries.Shared.ShoppingCart.Models
 @inject NavigationManager Navigation
 @rendermode InteractiveAuto
@@ -72,19 +73,18 @@
 <h3 class="titleDesign">Se de seneste ordrer</h3>
 <div class="container">
     <div class="left-panel">
-        <!--<h3>Ordrer</h3>
+        <h3>Ordrer</h3>
         <ul>
-            if (Orders != null)
+            @if (Orders != null)
             {
-                foreach (var order in Orders)
+                @foreach (var order in Orders.OrderByDescending(o => o.id).Take(20).OrderBy(o => o.id))
                 {
                     <li>
-                        <a onclick="() => SelectOrder(order)">@order.Items</a>
+                        <a @onclick="() => SelectOrder(order)">@order.orderId</a>
                     </li>
                 }
             }
         </ul>
-        -->
     </div>
 
     <div class="right-panel">
@@ -105,12 +105,21 @@
 </div>
 
 @code {
-    private List<ShoppingCartModel> Orders = new List<ShoppingCartModel>();
+    [Parameter]
+    public List<OrderModel> Orders { get; set; }
+
     private ShoppingCartModel SelectedOrder;
     private string SelectedOrderId { get; set; }
 
-    private void SelectOrder(ShoppingCartModel order)
+    protected override async Task OnInitializedAsync()
     {
-        SelectedOrder = order;
+        
+        await base.OnInitializedAsync();
     }
+
+    private void SelectOrder(OrderModel order)
+    {
+        //SelectedOrder = order;
+    }
+
 }
