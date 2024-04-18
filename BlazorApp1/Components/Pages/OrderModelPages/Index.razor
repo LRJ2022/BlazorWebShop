@@ -1,4 +1,4 @@
-﻿@page "/ordermodels"
+﻿@page "/admin"
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using MyBlazorShopHosted.Libraries.Shared.Order
 @inject BlazorApp1.Data.BlazorApp1Context DB
@@ -6,12 +6,17 @@
 @rendermode InteractiveServer
 
 <div>
-    @foreach (var item in DB.SXOrderId)
-    {
-        <div class="table">
-            <span>@item.orderId</span>
-            <button @onclick="() => OpenOrder(item.orderId)">Open</button>
-        </div>
+  
+        <QuickGrid Class="table" Items="DB.SXOrderId">
+        <PropertyColumn Property="ordermodel => ordermodel.orderId" />
+
+        <TemplateColumn Context="ordermodel">
+            <a href="@($"ordermodels/edit?id={ordermodel.id}")">Edit</a> |
+            <a href="@($"ordermodels/details?id={ordermodel.id}")">Details</a> |
+            <a href="@($"ordermodels/delete?id={ordermodel.id}")">Delete</a>
+        </TemplateColumn>
+        </QuickGrid>
+
     }
 </div>
 

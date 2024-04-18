@@ -47,15 +47,15 @@ namespace BlazorApp1.Components.PayPalAPI
             return captureLink;
         }
 
-        public async Task<(string?, bool)> PPAFetchOrder(string orderId)
+        public async Task<(object?, bool)> PPAFetchOrder(string orderId)
         {
             string? accessToken;
             if (orderId == null || (accessToken = await GETAccessToken(httpClient, PaypalClientId, PaypalSecret)) == null)
                 return (orderId == null ? "Error in accessToken fetch" : "No order id in API fetch", false);
-            HttpResponseMessage? orderDetails;
+            string? orderDetails;
             if ((orderDetails = await GETOrderDetails(httpClient, orderId, accessToken)) == null)
                 return ("Error in GETOrderDetails", false);
-            return (null, true);
+            return (orderDetails, true);
         }
 
         public async Task<(string?, bool)> PPACapturePayment(string orderId)
@@ -124,7 +124,7 @@ namespace BlazorApp1.Components.PayPalAPI
             return accessToken;
         }
 
-        private static async Task<HttpResponseMessage?> GETOrderDetails(HttpClient httpClient, string orderID, string accessToken)
+        private static async Task<string?> GETOrderDetails(HttpClient httpClient, string orderID, string accessToken)
         {
             var getOrderUrl = "https://api-m.sandbox.paypal.com/v2/checkout/orders/";
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
@@ -134,7 +134,7 @@ namespace BlazorApp1.Components.PayPalAPI
             httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
             var ordercontent = await response.Content.ReadAsStringAsync();
             var hello = PayPalTemplates.ConvertJsonToShoppingcart(ordercontent);
-            return response;
+            return ordercontent;
         }
 
         private static async Task<HttpResponseMessage?> GETListInvoices(HttpClient httpClient, string accessToken)
