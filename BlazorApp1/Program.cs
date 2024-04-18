@@ -17,6 +17,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
+using MyBlazorShopHosted.Libraries.Shared.Milk.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BlazorApp1Context>(options =>
@@ -40,6 +41,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IStorageService, StorageService>();
 builder.Services.AddSingleton<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddTransient<IProductService, ProductService>();
+builder.Services.AddSingleton<MilkProductCart>();
 
 builder.Services.AddScoped<HttpClient>(s =>
 {
