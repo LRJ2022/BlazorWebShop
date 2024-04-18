@@ -38,7 +38,7 @@ namespace BlazorApp1.Components.PayPalAPI
 
             string orderId = JsonDocument.Parse(await createOrderResponse.Content.ReadAsStringAsync()).RootElement.GetProperty("id").GetString();
             Console.WriteLine("Order created successfully " + orderId);
-            await PPAFetchOrder(orderId);
+            var resone = await PPAFetchOrder(orderId);
             var captureLink = await PPACapturePayment(orderId);
             return captureLink;
             //save orderId to db
