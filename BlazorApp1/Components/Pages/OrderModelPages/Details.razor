@@ -1,41 +1,97 @@
 ﻿@page "/ordermodels/details"
-@inject BlazorApp1.Data.BlazorApp1Context DB
+@using MyBlazorShopHosted.Libraries.Shared.Product.Models
+@using MyBlazorShopHosted.Libraries.Shared.ShoppingCart.Models
+@using MyBlazorShopHosted.Libraries.Services.Product
+@using Microsoft.CodeAnalysis.Differencing
 @using MyBlazorShopHosted.Libraries.Shared.Order
-@inject NavigationManager NavigationManager
 @using Microsoft.EntityFrameworkCore
+@using Newtonsoft.Json
+@using System.Text.RegularExpressions
+@inject IProductService productService
+@inject BlazorApp1.Data.BlazorApp1Context DB
+@inject NavigationManager NavigationManager
+@inject IConfiguration config
 
 <PageTitle>Details</PageTitle>
 
 <h1>Details</h1>
 
-<div>
-    <h4>OrderModel</h4>
-    <hr />
-    @if (ordermodel is null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">orderId</dt>
-            <dd class="col-sm-10">@ordermodel.orderId</dd>
-        </dl>
-        <div>
-            <a href="@($"/ordermodels/edit?id={ordermodel.id}")">Edit</a> |
-            <a href="@($"/ordermodels")">Back to List</a>
-        </div>
-    }
-</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                
+            </th>
+            <th>Name</th>
+            <th></th>
+            <th>Price</th>
+            <th></th>
+            <th>Quantuty</th>
+        </tr>
+    </thead>
+  
+@foreach (var item in OrderDetalis) {
+        <tr>
+            <td>
+                <img src="images/@item.Product.Image" style="max-height:100px"/>
+            </td>
+            <td>
+                @item.Product.Name
+            </td>
+            <td style="padding: 10px"></td>
+            <td>
+                @item.Product.Price.ToString()
+            </td>
+            <td style="padding: 10px"></td>
+            <td>
+                @item.Quatity
+            </td>
+            
+        </tr>
+}
+</table>
 
 @code {
-    OrderModel? ordermodel;
+    private OrderModel? ordermodel;
+    private IList<ProductModel> Products { get; set; }
+    private List<DetailsModel> OrderDetalis { get; set; } = new List<DetailsModel>();
 
     [SupplyParameterFromQuery]
     public int id { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        var productListingConfig = config.GetSection("ProductListing");
+
+        Products = productService.GetAll(8, 1);
+
         ordermodel = await DB.SXOrderId.FirstOrDefaultAsync(m => m.id == id);
+        BlazorApp1.Components.PayPalAPI.PayPalAPICom payPalAPICom = new PayPalAPI.PayPalAPICom(config, null, null, null);
+        var details = await payPalAPICom.PPAFetchOrder(ordermodel.orderId);
+        string pattern1 = @"""reference_id""\s*:\s*""([^""]+)""";
+        string pattern2 = @"""value""\s*:\s*""([^""]+)""";
+        List<string> referenceIds = new List<string>();
+        // Use Regex.Match to find the first occurrence of the pattern
+        MatchCollection matches1 = Regex.Matches((string)details.Item1, pattern1);
+        MatchCollection matches2 = Regex.Matches((string)details.Item1, pattern2);
+        int i = 0;
+        foreach (Match match in matches1)
+        {
+            referenceIds.Add(match.Groups[1].Value);
+            ProductModel product = Products.FirstOrDefault(i => i.Slug == match.Groups[1].Value);
+            {
+                var tmp = product;
+                string Valuestring = matches2[i].Groups[1].Value.Replace("\"", "");
+                decimal ValueNumber = Convert.ToDecimal(Valuestring.Substring(0, Valuestring.Length - 2));
+                OrderDetalis.Add(new DetailsModel()
+                    {
+                        Product = product,
+                        Total = ValueNumber,
+                        Quatity = (Convert.ToInt32(ValueNumber/product.Price))
+                    });
+            }
+            i++;
+        }
 
         if (ordermodel is null)
         {
