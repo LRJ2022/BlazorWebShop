@@ -1,0 +1,72 @@
+﻿@inject NavigationManager Navigation
+
+<head>
+    <style>
+        .dropdown {
+            position: absolute;
+            top: 25px;
+            right: 0px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 100px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 9999;
+            right: 10px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-link {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: black;
+        }
+
+            .dropdown-link:hover {
+                background-color: #f1f1f1;
+            }
+    </style>
+</head>
+
+<!-- Dropdown Login and Logout -->
+<div class="dropdown" @onblur="HideDropdown">
+    <button @onclick="ToggleDropdown">
+        <img src="/images/userIcon.png" alt="Icon" style="width: 40px; height: 40px;" />
+    </button>
+    <span class="dropdown-content" style="dropdownStyle">
+    <AuthorizeView>
+        <Authorized>
+                <AuthorizeView Roles="Admin" Context="innerContext">
+                    <a class="dropdown-link" href="/admin">Administrator</a>
+                </AuthorizeView>
+                <a class="dropdown-link" href="Account/Logout">Log ud</a>
+        </Authorized>
+
+        <NotAuthorized>
+            <a class="dropdown-link" href="Account/Login?redirectUri=/">Log ind</a>
+        </NotAuthorized>
+    </AuthorizeView>
+    </span>
+</div>
+
+@code {
+    private bool showDropdown = false;
+    private string dropdownStyle => showDropdown ? "display: block;" : "display: none;";
+
+    private void ToggleDropdown()
+    {
+        showDropdown = !showDropdown;
+    }
+
+    private void HideDropdown()
+    {
+        showDropdown = false;
+    }
+}

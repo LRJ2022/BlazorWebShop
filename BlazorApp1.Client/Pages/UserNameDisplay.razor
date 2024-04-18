@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+<head>
+    <style>
+        .welcomeUserText {
+            text-align: center;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<AuthorizeView>
+    <Authorized>
+        <h1 class="welcomeUserText">Velkommen @Username!</h1>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private string Username = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+
+            Username = state?.User?.Identity?.Name ?? string.Empty;
+        }
+        await base.OnInitializedAsync();
+    }
+}
