@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MyBlazorShopHosted.Libraries.Services.ShoppingCart;
+using MyBlazorShopHosted.Libraries.Shared.Order;
 using MyBlazorShopHosted.Libraries.Shared.ShoppingCart.Models;
 using System;
 using System.Text;
 using System.Text.Json;
+using BlazorApp1.Data;
 
 namespace BlazorApp1.Components.PayPalAPI
 {
@@ -12,15 +14,17 @@ namespace BlazorApp1.Components.PayPalAPI
         private string PaypalClientId = "";
         private string PaypalSecret = "";
         private string PaypalUrl = "";
-        private decimal total;
+        private decimal? total;
         private ShoppingCartModel shoppingCart;
         private HttpClient httpClient = new HttpClient();
+        private BlazorApp1Context DB { get; set; }
 
         // Constructor to inject dependencies
-        public PayPalAPICom(IConfiguration config, ShoppingCartModel shoppingCartModel, decimal total)
+        public PayPalAPICom(IConfiguration config, ShoppingCartModel shoppingCartModel, decimal? total, BlazorApp1Context DB)
         {
             shoppingCart = shoppingCartModel;
             this.total = total;
+            this.DB = DB;
 
             PaypalClientId = config["PaypalSettings:CLIENT_ID"]!;
             PaypalSecret = config["PaypalSettings:Secret"]!;
@@ -38,10 +42,9 @@ namespace BlazorApp1.Components.PayPalAPI
 
             string orderId = JsonDocument.Parse(await createOrderResponse.Content.ReadAsStringAsync()).RootElement.GetProperty("id").GetString();
             Console.WriteLine("Order created successfully " + orderId);
-            var resone = await PPAFetchOrder(orderId);
             var captureLink = await PPACapturePayment(orderId);
+            SaveToDB(orderId);
             return captureLink;
-            //save orderId to db
         }
 
         public async Task<(string?, bool)> PPAFetchOrder(string orderId)
@@ -161,6 +164,16 @@ namespace BlazorApp1.Components.PayPalAPI
             var response = await httpClient.GetAsync(getAuthorizeurl);
             var responseContent = await response.Content.ReadAsStringAsync();
             return response;
+        }
+
+        private async void SaveToDB(string orderId)
+        {
+            OrderModel orderModel = new OrderModel()
+            {
+                orderId = orderId,
+            };
+            DB.SXOrderId.Add(orderModel);
+            DB.SaveChangesAsync();
         }
     }
 }
