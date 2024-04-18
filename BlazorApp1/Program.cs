@@ -1,4 +1,4 @@
-using BlazorApp1.Client.Pages;
+﻿using BlazorApp1.Client.Pages;
 using BlazorApp1.Components;
 using MyBlazorShopHosted.Libraries.Services.Product;
 using MyBlazorShopHosted.Libraries.Services.ShoppingCart;
@@ -7,8 +7,22 @@ using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using BlazorApp1.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Globalization;
+using Microsoft.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<BlazorApp1Context>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("BlazorApp1Context") ?? throw new InvalidOperationException("Connection string 'BlazorApp1Context' not found.")));
+
+builder.Services.AddQuickGridEntityFrameworkAdapter();;
 
 //Services for authentication
 builder.Services.AddCascadingAuthenticationState();
@@ -26,6 +40,15 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IStorageService, StorageService>();
 builder.Services.AddSingleton<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddTransient<IProductService, ProductService>();
+
+builder.Services.AddScoped<HttpClient>(s =>
+{
+    var uriHelper = s.GetRequiredService<NavigationManager>();
+    return new HttpClient
+    {
+        BaseAddress = new Uri(uriHelper.BaseUri)
+    };
+});
 
 var app = builder.Build();
 
