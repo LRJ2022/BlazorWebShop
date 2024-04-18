@@ -1,0 +1,24 @@
+﻿@page "/ordermodels"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyBlazorShopHosted.Libraries.Shared.Order
+@inject BlazorApp1.Data.BlazorApp1Context DB
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<div>
+    @foreach (var item in DB.SXOrderId)
+    {
+        <div class="table">
+            <span>@item.orderId</span>
+            <button @onclick="() => OpenOrder(item.orderId)">Open</button>
+        </div>
+    }
+</div>
+
+@code {
+    void OpenOrder(string id)
+    {
+        Console.WriteLine($"Opening order with id: {id}");
+        NavigationManager.NavigateTo("/");
+    }
+}
